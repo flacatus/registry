@@ -49,19 +49,22 @@ var _ = Describe("RHTAP sample checks", Ordered, Label("nightly"), func() {
 				fw, err = testHub.InitControllerHub(kubeClient)
 				Expect(err).NotTo(HaveOccurred())
 
-				// If not namespace specified creates one
-				if testNamespace == "" {
-					ns, err := fw.CommonController.CreateTestNamespace(utils.GetGeneratedNamespace("stack-"))
-					Expect(err).NotTo(HaveOccurred())
-					testNamespace = ns.Name
-				} else {
-					testNamespace = namespace
-				}
 			})
 
 			AfterAll(func() {
 				if !CurrentSpecReport().Failed() {
 					Expect(fw.HasController.DeleteAllApplicationsInASpecificNamespace(testNamespace, 30*time.Second)).To(Succeed())
+				}
+			})
+
+			It("creates stack namespace", func() {
+				// If not namespace specified creates one
+				if namespace != "" {
+					testNamespace = namespace
+				} else {
+					ns, err := fw.CommonController.CreateTestNamespace(utils.GetGeneratedNamespace("stack"))
+					Expect(err).NotTo(HaveOccurred())
+					testNamespace = ns.Name
 				}
 			})
 
